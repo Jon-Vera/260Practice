@@ -1,0 +1,985 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CSCI 260 Lecture-Style Algorithm Practice</title>
+<style>
+:root{
+  --cyan1:#2fc2db;
+  --cyan2:#1197c5;
+  --blue:#1352a2;
+  --ink:#222327;
+  --white:#f8fbff;
+  --lime:#8ee35e;
+  --yellow:#f6ea3c;
+  --red:#ff4f6d;
+  --purple:#6448ff;
+  --muted:#d3eef7;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:"Avenir Next","Trebuchet MS",system-ui,sans-serif;
+  color:var(--white);
+  background:
+    radial-gradient(circle at 75% 25%,rgba(255,255,255,.08),transparent 28%),
+    linear-gradient(135deg,var(--cyan1),var(--cyan2) 58%,var(--blue));
+}
+main{max-width:1100px;margin:0 auto;padding:24px}
+.hero{
+  background:var(--ink);
+  padding:20px 24px;
+  margin:0 0 18px;
+  border-radius:2px;
+  box-shadow:0 9px 20px rgba(0,0,0,.2);
+}
+.hero h1{margin:0;font-size:clamp(1.55rem,3.2vw,2.55rem);font-weight:650}
+.hero p{margin:8px 0 0;color:#d9dde5}
+.controls{
+  display:grid;
+  grid-template-columns:minmax(180px,.8fr) minmax(260px,1.4fr) minmax(150px,.55fr);
+  gap:12px;
+  align-items:end;
+}
+@media(max-width:700px){.controls{grid-template-columns:1fr}}
+label{display:block;font-size:.88rem;font-weight:700}
+select,input{
+  width:100%;margin-top:6px;padding:12px 13px;border:2px solid rgba(255,255,255,.72);
+  background:rgba(0,0,0,.15);color:#fff;border-radius:4px;font-size:16px;
+}
+option{color:#111}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.toolbar{margin:12px 0 16px}
+button{
+  min-height:44px;padding:10px 14px;border:2px solid rgba(255,255,255,.78);
+  color:#fff;background:rgba(21,25,32,.78);border-radius:5px;font-weight:700;cursor:pointer;
+}
+button:hover{background:#272c36}
+button.primary{background:#213969}
+button.answer{
+  min-width:108px;
+  background:rgba(21,25,32,.78);
+  border-color:rgba(255,255,255,.78);
+}
+button.answer:hover{
+  background:#272c36;
+  border-color:#fff;
+}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.pill{background:rgba(34,35,39,.8);padding:8px 12px;border-radius:4px;font-size:.86rem}
+.lesson{
+  background:rgba(9,78,139,.16);
+  border:2px solid rgba(255,255,255,.36);
+  padding:16px;
+  min-height:440px;
+}
+.slide-title{
+  background:var(--ink);
+  margin:-16px -16px 16px;
+  padding:14px 20px;
+  font-size:1.3rem;font-weight:700;
+}
+.subhead{text-align:center;font-size:1rem;line-height:1.4;margin:0 auto 12px;max-width:820px}
+.meta{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px auto 14px;max-width:760px;
+}
+.meta > div{background:rgba(0,0,0,.16);padding:8px;text-align:center;border-radius:3px}
+.meta b{display:block;color:var(--yellow);font-size:.78rem;margin-bottom:2px}
+@media(max-width:650px){.meta{grid-template-columns:1fr}}
+.arrayWrap{overflow-x:auto;padding:10px 2px 16px}
+.array{
+  display:flex;justify-content:center;align-items:flex-end;gap:0;min-width:max-content;
+}
+.cell{
+  width:68px;position:relative;text-align:center;border:2px solid white;border-right-width:0;
+  background:rgba(255,255,255,.04);min-height:70px;padding-top:28px;
+}
+.cell:last-child{border-right-width:2px}
+.index{position:absolute;top:-27px;left:0;right:0;text-align:center;font-size:.9rem}
+.value{font-size:1.35rem;font-weight:650}
+.cell.active{outline:4px solid var(--purple);outline-offset:-3px}
+.cell.selected{outline:4px solid var(--purple);outline-offset:-3px}
+.cell.currentSmallest{box-shadow:inset 0 -5px 0 var(--lime)}
+.cell.middle{outline:4px solid var(--yellow);outline-offset:-3px}
+.cell.pivot{box-shadow:inset 0 5px 0 var(--lime)}
+.cell.dim{opacity:.28}
+.pointer{
+  position:absolute;bottom:-46px;left:50%;transform:translateX(-50%);
+  font-size:.8rem;color:var(--lime);font-weight:800;white-space:nowrap;
+}
+.pointer::before{content:"↑";display:block;font-size:1.35rem;line-height:.7}
+.array-spacer{height:44px}
+.question{
+  margin:14px auto 0;max-width:860px;text-align:center;background:rgba(34,35,39,.86);
+  border-radius:4px;padding:15px 16px;
+}
+.questionText{font-size:1.05rem;font-weight:700;line-height:1.45}
+.actions{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:12px}
+.feedback{min-height:26px;margin-top:10px;font-weight:800}
+.good{color:#b8ff87}.bad{color:#ffd0d7}
+.rule{margin:11px auto 0;max-width:800px;color:#e5f7fb;line-height:1.45;border-top:1px solid rgba(255,255,255,.3);padding-top:10px}
+.hidden{display:none!important}
+.small{font-size:.82rem;color:var(--muted)}
+.mergeTree{display:flex;flex-direction:column;gap:10px;align-items:center;margin:12px auto;max-width:950px}
+.mergeLevel{display:flex;flex-wrap:wrap;gap:20px;justify-content:center}
+.group{display:flex;gap:0}
+.miniCell{min-width:42px;border:2px solid white;border-right-width:0;padding:7px 8px;text-align:center;background:rgba(255,255,255,.04)}
+.miniCell:last-child{border-right-width:2px}
+.mergeCompare{outline:3px solid var(--purple);outline-offset:-2px}
+.mergeOut{margin-top:8px}
+.quick-note{color:#ffe88c;text-align:center;font-size:.88rem;margin-top:8px}
+.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:12px;font-size:.78rem}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.dot{width:13px;height:13px;border:2px solid white;display:inline-block}
+.dot.purple{border-color:var(--purple)} .dot.yellow{border-color:var(--yellow)}
+.dot.green{border-color:var(--lime)}
+footer{margin:16px 0 0;color:#e4f4f9;font-size:.78rem;text-align:center}
+
+.mergePractice{width:100%;margin-top:10px}
+.mergeGrid{
+  display:grid;gap:8px 0;align-items:center;width:100%;min-width:600px;
+}
+.mergeRow{display:grid;grid-template-columns:repeat(var(--n),minmax(42px,1fr));gap:4px;align-items:center}
+.mergeSegment{display:flex;justify-content:center;align-items:center;min-width:0}
+.mergeSegment .group{max-width:100%}
+.mergeSectionLabel{text-align:center;font-weight:800;margin:10px 0 6px;color:var(--yellow)}
+.mergeCurrent{border-top:2px dashed rgba(255,255,255,.45);padding-top:10px;margin-top:10px}
+.mergeOutputLabel{text-align:center;font-size:.78rem;color:var(--yellow);margin:5px 0}
+.hashLayout{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.7fr);gap:24px;align-items:start;margin:14px auto;max-width:900px}
+@media(max-width:720px){.hashLayout{grid-template-columns:1fr}.mergeGrid{min-width:520px}}
+.hashWork{background:rgba(34,35,39,.55);padding:14px;border-radius:4px;line-height:1.55}
+.hashFormula{font-size:1.02rem;font-weight:750;color:#fff}
+.hashStep{margin-top:8px;color:var(--yellow);font-weight:800}
+.hashTable{border-collapse:collapse;width:100%;background:#eef7fb;color:#111}
+.hashTable th,.hashTable td{border:2px solid #8bc9dd;padding:9px 10px;text-align:center}
+.hashTable th{background:#d8eef6}
+.hashTable td.chain{text-align:left}
+.hashArrow{color:#555;padding:0 5px}
+.hashCurrent{outline:4px solid var(--purple);outline-offset:-3px}
+.hashCollision{background:#ffe8ec!important}
+.hashEmpty{color:#8aa0aa}
+
+</style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <h1>CSCI 260 Algorithm Practice</h1>
+    <p>Lecture-slide style practice for Professor Doxey's sorting and searching methods.</p>
+  </section>
+
+  <div class="controls">
+    <label>Algorithm
+      <select id="mode">
+        <option value="bubble">Bubble Sort</option>
+        <option value="insertion">Insertion Sort</option>
+        <option value="selection">Selection Sort</option>
+        <option value="merge">Merge Sort</option>
+        <option value="quick">Quick Sort</option>
+        <option value="linear">Linear Search</option>
+        <option value="binary">Binary Search</option>
+        <option value="hash-chain">Hashing — Separate Chaining</option>
+        <option value="hash-linear">Hashing — Linear Probing</option>
+        <option value="hash-quadratic">Hashing — Quadratic Probing</option>
+        <option value="hash-double">Hashing — Double Hashing</option>
+      </select>
+    </label>
+    <label id="dataLabel">Custom array (3–10 integers)
+      <input id="arrayInput" value="77, 42, 35, 12, 101, 5">
+    </label>
+    <label id="hashSizeLabel" class="hidden">Hash table size
+      <input id="hashSize" type="number" min="3" max="10" value="5">
+    </label>
+  </div>
+
+  <div class="row toolbar">
+    <button id="apply" class="primary">Apply Array</button>
+    <button id="random">Random Problem</button>
+    <button id="lecture">Lecture Example</button>
+    <button id="ruleBtn">Show Rule</button>
+    <button id="resetScore">Reset Score</button>
+  </div>
+
+  <div class="stats">
+    <div class="pill">Score: <b id="score">0 / 0</b></div>
+    <div class="pill">Accuracy: <b id="accuracy">—</b></div>
+    <div class="pill">Iteration: <b id="iteration">1</b></div>
+  </div>
+
+  <section class="lesson">
+    <div class="slide-title" id="slideTitle">How Bubble Sort Works – Iteration 1</div>
+    <p class="subhead" id="subhead"></p>
+
+    <div class="meta hidden" id="meta"></div>
+
+    <div id="arrayWrap" class="arrayWrap">
+      <div id="array" class="array"></div>
+      <div class="array-spacer"></div>
+    </div>
+
+    <div id="mergeTree" class="mergeTree hidden"></div>
+
+    <div class="question">
+      <div class="questionText" id="prompt"></div>
+      <div class="actions" id="actions"></div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+      <div class="rule hidden" id="rule"></div>
+    </div>
+
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <footer>This file runs locally in your browser; no server or internet connection is required.</footer>
+</main>
+
+<script>
+(() => {
+"use strict";
+const $ = id => document.getElementById(id);
+const modeEl=$("mode"), inputEl=$("arrayInput"), arrayEl=$("array"), arrayWrap=$("arrayWrap");
+const dataLabelEl=$("dataLabel"), hashSizeLabelEl=$("hashSizeLabel"), hashSizeEl=$("hashSize");
+const treeEl=$("mergeTree"), promptEl=$("prompt"), actionsEl=$("actions"), feedbackEl=$("feedback");
+const ruleEl=$("rule"), titleEl=$("slideTitle"), subheadEl=$("subhead"), metaEl=$("meta"), legendEl=$("legend");
+const scoreEl=$("score"), accuracyEl=$("accuracy"), iterationEl=$("iteration");
+
+const rules={
+ bubble:"Move from left to right. Compare neighboring elements. If the left value is greater than the right value, swap them. Repeat until the array is sorted.",
+ insertion:"Conceptually split the array into sorted and unsorted sections. Compare the next unsorted value with the value before it. Whenever a swap occurs, check the previous two indexes again.",
+ selection:"For each selected index, scan every remaining value from left to right. Track the current smallest element, then swap that smallest value into the selected index.",
+ merge:"Divide the array into halves until every element is separate. Merge neighboring groups back together in sorted order. If an odd-sized group is split, the lecture puts the larger sub-array on the left.",
+ quick:"Choose a pivot. Use Left and Right pointers. When the pivot is at Left, compare it with Right; when it is at Right, compare it with Left. Swap when the comparison fails, until Left and Right meet at the pivot.",
+ linear:"Compare the target with each element one by one from left to right. Return the matching index; if no match is found, return -1.",
+ binary:"The array must be sorted. Calculate the middle index with (start index + end index) / 2 and round down. Compare the middle value with the target, then keep only the appropriate half.",
+ "hash-chain":"Use H(x) = x % table size. If two keys map to the same index, keep them at that same index in a chain.",
+ "hash-linear":"Use H(x) = x % table size. On a collision, move to the next available index.",
+ "hash-quadratic":"Use H(x) = x % table size. On a collision, try (original hash index + i²) % table size, with i starting at 1 and increasing for that key.",
+ "hash-double":"Use H1(x) = x % table size. On a collision, compute H2(x) = 1 + (x % 3), then probe [H1(x) + i × H2(x)] % table size with i starting at 1."
+};
+const lecturePresets={
+ bubble:{a:[77,42,35,12,101,5]},
+ insertion:{a:[36,10,24,6,32]},
+ selection:{a:[5,2,1,4,3]},
+ merge:{a:[98,23,45,14,6,67,33,42]},
+ quick:{a:[5,2,6,1,3,4]},
+ linear:{a:[29,20,14,31,35,18],t:18},
+ binary:{a:[4,6,7,8,10,12],t:10},
+ "hash-chain":{a:[50,70,76,85,93],size:5},
+ "hash-linear":{a:[50,70,76,85,93],size:5},
+ "hash-quadratic":{a:[50,70,76,85,93],size:5},
+ "hash-double":{a:[50,70,76,85,99],size:5}
+};
+
+let base=lecturePresets.bubble.a.slice(), work=[], mode="bubble";
+let correct=0,attempts=0,done=false,iter=1,target=null;
+
+// bubble
+let bPass=0,bJ=0;
+// insertion
+let insOuter=1,insPos=1;
+// selection
+let sel=0,selMin=0,selScan=1,selPhase="scan";
+// linear
+let linIndex=0;
+// binary
+let binStart=0,binEnd=0,binMid=null,binPhase="middle";
+// merge
+let mergeLevels=[],mergeReveal=1,mergeJobs=[],mergeJob=0,mL=[],mR=[],mO=[],mLi=0,mRi=0,mergePhase="divide";
+// quick
+let qStack=[],qLow=0,qHigh=0,qPivotIndex=0,qPivotVal=0,qLeft=0,qRight=0,qSide="right";
+// hashing
+let hashSize=5,hashTable=[],hashKeyIndex=0,hashPhase="hash",hashBase=0,hashProbeI=1,hashH2=null,hashProbeIndex=null,hashHistory=[];
+
+function parseArray(s){
+ const a=s.split(",").map(x=>Number(x.trim())).filter(Number.isFinite).map(Math.trunc);
+ return (a.length>=3&&a.length<=10)?a:null;
+}
+function randomUnique(n=6){
+ const set=new Set();
+ while(set.size<n)set.add(1+Math.floor(Math.random()*98));
+ return [...set];
+}
+function chooseTarget(a){
+ if(Math.random()<.7)return a[Math.floor(Math.random()*a.length)];
+ let x; do{x=1+Math.floor(Math.random()*98)}while(a.includes(x)); return x;
+}
+function score(ok){
+ attempts++; if(ok)correct++;
+ scoreEl.textContent=correct+" / "+attempts;
+ accuracyEl.textContent=attempts?Math.round(correct/attempts*100)+"%":"—";
+}
+function feedback(ok,msg){
+ feedbackEl.textContent=msg;
+ feedbackEl.className="feedback "+(ok?"good":"bad");
+}
+function clearFeedback(){feedbackEl.textContent="";feedbackEl.className="feedback";}
+function button(txt,fn,primary=false){
+ const b=document.createElement("button");
+ b.type="button";
+ b.textContent=txt;
+ // Deliberately ignore "primary" for quiz answers so no option looks pre-selected.
+ b.className="answer";
+ b.addEventListener("click",fn);
+ actionsEl.appendChild(b);
+ return b;
+}
+function meta(items){
+ metaEl.innerHTML=items.map(([k,v])=>`<div><b>${k}</b>${v}</div>`).join("");
+ metaEl.classList.remove("hidden");
+}
+function noMeta(){metaEl.classList.add("hidden");metaEl.innerHTML="";}
+function pointerLabel(k){
+ if(mode==="quick"){
+   const labs=[];
+   if(k===qPivotIndex)labs.push("Pivot");
+   if(k===qLeft)labs.push("Left");
+   if(k===qRight)labs.push("Right");
+   return labs.join(" / ");
+ }
+ return "";
+}
+function renderArray(click=null){
+ arrayEl.innerHTML="";
+ work.forEach((v,k)=>{
+   const c=document.createElement("div");c.className="cell";
+   if(mode==="bubble"&&!done&&(k===bJ||k===bJ+1))c.classList.add("active");
+   if(mode==="insertion"&&!done&&(k===insPos||k===insPos-1))c.classList.add("active");
+   if(mode==="selection"){
+     if(k===sel)c.classList.add("selected");
+     if(k===selMin)c.classList.add("currentSmallest");
+     if(selPhase==="scan"&&k===selScan)c.classList.add("active");
+   }
+   if(mode==="linear"&&k===linIndex)c.classList.add("active");
+   if(mode==="binary"){
+     if(k<binStart||k>binEnd)c.classList.add("dim");
+     if(binMid===k)c.classList.add("middle");
+   }
+   if(mode==="quick"){
+     if(k<qLow||k>qHigh)c.classList.add("dim");
+     if(k===qPivotIndex)c.classList.add("pivot");
+     if((qSide==="right"&&k===qRight)||(qSide==="left"&&k===qLeft))c.classList.add("active");
+   }
+   c.innerHTML=`<div class="index">${k}</div><div class="value">${v}</div>`;
+   const pl=pointerLabel(k);
+   if(pl)c.innerHTML+=`<div class="pointer">${pl}</div>`;
+   if(click){
+     c.style.cursor="pointer";
+     c.addEventListener("click",()=>click(k));
+   }
+   arrayEl.appendChild(c);
+ });
+}
+function legend(items){
+ legendEl.innerHTML=items.map(([cls,t])=>`<span><i class="dot ${cls}"></i>${t}</span>`).join("");
+}
+
+function setup(forceTarget=null){
+ mode=modeEl.value;work=base.slice();done=false;iter=1;clearFeedback();
+ ruleEl.textContent=rules[mode];ruleEl.classList.add("hidden");
+ treeEl.classList.add("hidden");arrayWrap.classList.remove("hidden");noMeta();
+ bPass=0;bJ=0;insOuter=1;insPos=1;sel=0;selMin=0;selScan=1;selPhase="scan";
+ linIndex=0;binStart=0;binEnd=work.length-1;binMid=null;binPhase="middle";
+ target=null;
+
+ const hashing=mode.startsWith("hash-");
+ hashSizeLabelEl.classList.toggle("hidden",!hashing);
+ dataLabelEl.firstChild.textContent=hashing?"Custom keys (3–10 integers)":"Custom array (3–10 integers)";
+
+ if(mode==="linear"||mode==="binary")target=forceTarget!==null?forceTarget:chooseTarget(work);
+ if(mode==="binary")work.sort((a,b)=>a-b);
+ if(mode==="merge")initMerge();
+ if(mode==="quick")initQuick();
+ if(hashing)initHash();
+ render();
+}
+
+function render(){
+ actionsEl.innerHTML="";
+ iterationEl.textContent=iter;
+ if(done){
+   const hashing=mode.startsWith("hash-");
+   if(mode==="linear"||mode==="binary")titleEl.textContent="Search Complete";
+   else if(hashing) titleEl.textContent="Hash Table Complete";
+   else titleEl.textContent=`${names()[mode]} – Sorted`;
+   subheadEl.textContent=(mode==="linear"||mode==="binary")?"The search is complete.":hashing?"All keys have been inserted into the hash table.":"The array is now sorted!";
+   noMeta();
+   if(hashing){
+      arrayWrap.classList.add("hidden");treeEl.classList.remove("hidden");renderHashTableOnly();
+      promptEl.textContent="Hash table complete.";
+   } else {
+      if(mode!=="merge"){arrayWrap.classList.remove("hidden");treeEl.classList.add("hidden");renderArray();}
+      promptEl.textContent=mode==="linear"||mode==="binary"?"Start another problem when you are ready.":"Sorted array: "+work.join(", ");
+   }
+   button("Random Problem",()=>{$("random").click();},true);
+   return;
+ }
+ if(mode==="bubble")renderBubble();
+ else if(mode==="insertion")renderInsertion();
+ else if(mode==="selection")renderSelection();
+ else if(mode==="merge")renderMerge();
+ else if(mode==="quick")renderQuick();
+ else if(mode==="linear")renderLinear();
+ else if(mode==="binary")renderBinary();
+ else if(mode.startsWith("hash-"))renderHash();
+}
+function names(){return {
+ bubble:"Bubble Sort",insertion:"Insertion Sort",selection:"Selection Sort",merge:"Merge Sort",quick:"Quick Sort",
+ linear:"Linear Search",binary:"Binary Search",
+ "hash-chain":"Hashing — Separate Chaining",
+ "hash-linear":"Hashing — Linear Probing",
+ "hash-quadratic":"Hashing — Quadratic Probing",
+ "hash-double":"Hashing — Double Hashing"
+}}
+
+// Bubble
+function renderBubble(){
+ titleEl.textContent=`How Bubble Sort Works – Iteration ${bPass+1}`;
+ subheadEl.textContent="Move from the beginning (left) to the end (right) and bubble the largest value to the end using pair comparisons.";
+ noMeta();renderArray();legend([["purple","Current pair"]]);
+ const a=work[bJ],b=work[bJ+1];
+ promptEl.textContent=`Is ${a} > ${b}?`;
+ button("Yes — Swap",()=>bubbleAnswer(true),true);
+ button("No — Don't Swap",()=>bubbleAnswer(false));
+}
+function bubbleAnswer(yes){
+ const expected=work[bJ]>work[bJ+1];const ok=yes===expected;score(ok);
+ if(!ok){feedback(false,expected?"The left value is greater, so these two should swap.":"The left value is not greater, so do not swap.");return;}
+ if(expected)[work[bJ],work[bJ+1]]=[work[bJ+1],work[bJ]];
+ feedback(true,expected?"Correct — swap them.":"Correct — no swap.");
+ bJ++;
+ if(bJ>=work.length-bPass-1){bPass++;bJ=0;iter=bPass+1;}
+ if(bPass>=work.length-1)done=true;
+ render();
+}
+
+// Insertion
+function renderInsertion(){
+ titleEl.textContent=`How Insertion Sort Works – Iteration ${insOuter}`;
+ subheadEl.textContent="Whenever a swap occurs, check the previous two indexes again.";
+ meta([["Sorted Section",`indexes 0–${insOuter-1}`],["Comparing",`indexes ${insPos-1} and ${insPos}`],["Next Unsorted Index",insOuter]]);
+ renderArray();legend([["purple","Current comparison"]]);
+ const left=work[insPos-1],right=work[insPos];
+ promptEl.textContent=`Is ${left} > ${right}?`;
+ button("Yes — Swap",()=>insertionAnswer(true),true);
+ button("No — Don't Swap",()=>insertionAnswer(false));
+}
+function insertionAnswer(yes){
+ const expected=work[insPos-1]>work[insPos],ok=yes===expected;score(ok);
+ if(!ok){feedback(false,expected?"Swap them, then check the previous two indexes again.":"Do not swap. This iteration can stop here.");return;}
+ if(expected){
+   [work[insPos-1],work[insPos]]=[work[insPos],work[insPos-1]];
+   insPos--;
+   feedback(true,"Correct — swap them.");
+   if(insPos===0)advanceInsertion();
+ }else{
+   feedback(true,"Correct — don't swap. No need to keep checking earlier indexes.");
+   advanceInsertion();
+ }
+ render();
+}
+function advanceInsertion(){
+ insOuter++;iter=insOuter;
+ if(insOuter>=work.length){done=true;return;}
+ insPos=insOuter;
+}
+
+// Selection
+function renderSelection(){
+ titleEl.textContent=`How Selection Sort Works – Iteration ${sel+1}`;
+ subheadEl.textContent="Check each element from left to right. Track the current smallest element. At the end, swap it with the element in the selected index.";
+ meta([["Selected Index",`${sel} (element ${work[sel]})`],["Current Smallest",`${work[selMin]} at index ${selMin}`],["Checking",selPhase==="scan"?`index ${selScan}`:"scan complete"]]);
+ renderArray();legend([["purple","Selected/current check"],["green","Current smallest"]]);
+ if(selPhase==="scan"){
+   promptEl.textContent=`Is ${work[selScan]} < ${work[selMin]}?`;
+   button("Yes — New Smallest",()=>selectionScan(true),true);
+   button("No — Keep Smallest",()=>selectionScan(false));
+ }else{
+   const needs=selMin!==sel;
+   promptEl.textContent=needs?`Next Step: swap ${work[sel]} (selected index) and ${work[selMin]} (smallest element)?`:"The smallest element is already inside the selected index. Swap?";
+   button("Swap",()=>selectionSwap(true),true);
+   button("No Swap",()=>selectionSwap(false));
+ }
+}
+function selectionScan(yes){
+ const expected=work[selScan]<work[selMin],ok=yes===expected;score(ok);
+ if(!ok){feedback(false,expected?"Yes. This value becomes the new current smallest.":"No. Keep the current smallest.");return;}
+ if(expected)selMin=selScan;
+ selScan++;
+ feedback(true,expected?"Correct — update the current smallest.":"Correct — keep the current smallest.");
+ if(selScan>=work.length)selPhase="swap";
+ render();
+}
+function selectionSwap(yes){
+ const expected=selMin!==sel,ok=yes===expected;score(ok);
+ if(!ok){feedback(false,expected?"The smallest element is elsewhere, so swap it into the selected index.":"The smallest element is already selected, so there is no swap.");return;}
+ if(expected)[work[sel],work[selMin]]=[work[selMin],work[sel]];
+ feedback(true,expected?"Correct — swap complete.":"Correct — no swap.");
+ sel++;iter=sel+1;
+ if(sel>=work.length-1){done=true;render();return;}
+ selMin=sel;selScan=sel+1;selPhase="scan";render();
+}
+
+// Merge — lecture-style: full split tree is shown automatically, then merges stay in their own partition positions
+function makeSeg(values,start){
+  return {values:values.slice(),start:start,end:start+values.length-1,left:null,right:null};
+}
+function buildMergeTree(values,start=0){
+  const node=makeSeg(values,start);
+  if(values.length>1){
+    const leftCount=Math.ceil(values.length/2); // lecture rule: extra element stays on the LEFT
+    node.left=buildMergeTree(values.slice(0,leftCount),start);
+    node.right=buildMergeTree(values.slice(leftCount),start+leftCount);
+  }
+  return node;
+}
+function collectLevels(root){
+  const levels=[];
+  function walk(n,d){
+    (levels[d]??=[]).push(n);
+    if(n.left){walk(n.left,d+1);walk(n.right,d+1);}
+  }
+  walk(root,0);return levels;
+}
+function collectMergeTasks(root){
+  const jobs=[];
+  function post(n){
+    if(!n.left)return n.values.slice();
+    const L=post(n.left),R=post(n.right);
+    const out=[];let a=0,b=0;
+    while(a<L.length&&b<R.length)out.push(L[a]<=R[b]?L[a++]:R[b++]);
+    while(a<L.length)out.push(L[a++]);while(b<R.length)out.push(R[b++]);
+    jobs.push({node:n,leftNode:n.left,rightNode:n.right,L:L.slice(),R:R.slice(),result:out.slice()});
+    return out;
+  }
+  post(root);return jobs;
+}
+let mergeRoot=null,mergeCompleted=new Map();
+
+function initMerge(){
+  mergeRoot=buildMergeTree(work,0);
+  mergeLevels=collectLevels(mergeRoot);
+  mergeJobs=collectMergeTasks(mergeRoot);
+  mergeCompleted=new Map();
+  mergeJob=0;mergePhase="merge";
+  loadMergeJob();
+}
+function segKey(n){return `${n.start}-${n.end}`}
+function spanStyle(n){return `grid-column:${n.start+1} / span ${n.end-n.start+1}`}
+
+function mergeGroupHTML(values,front=-1){
+  return `<div class="group">${values.map((v,k)=>`<span class="miniCell ${k===front?"mergeCompare":""}">${v}</span>`).join("")}</div>`;
+}
+function renderSplitTree(){
+  let html=`<div class="mergeSectionLabel">Divide — full split tree</div><div class="mergeGrid" style="--n:${work.length}">`;
+  mergeLevels.forEach(level=>{
+    html+=`<div class="mergeRow" style="--n:${work.length}">`;
+    level.forEach(n=>{
+      html+=`<div class="mergeSegment" style="${spanStyle(n)}">${mergeGroupHTML(n.values)}</div>`;
+    });
+    html+=`</div>`;
+  });
+  html+=`</div>`;
+  return html;
+}
+function renderCompletedMerges(){
+  if(mergeCompleted.size===0)return "";
+  const entries=[...mergeCompleted.values()].sort((a,b)=>{
+    const al=a.node.end-a.node.start,bl=b.node.end-b.node.start;
+    return al-bl || a.node.start-b.node.start;
+  });
+  const grouped=new Map();
+  entries.forEach(e=>{
+    const len=e.node.end-e.node.start+1;
+    if(!grouped.has(len))grouped.set(len,[]);
+    grouped.get(len).push(e);
+  });
+  let html=`<div class="mergeSectionLabel">Completed merges</div><div class="mergeGrid" style="--n:${work.length}">`;
+  [...grouped.keys()].sort((a,b)=>a-b).forEach(len=>{
+    html+=`<div class="mergeRow" style="--n:${work.length}">`;
+    grouped.get(len).forEach(e=>{
+      html+=`<div class="mergeSegment" style="${spanStyle(e.node)}">${mergeGroupHTML(e.result)}</div>`;
+    });
+    html+=`</div>`;
+  });
+  html+=`</div>`;
+  return html;
+}
+function renderActiveMerge(){
+  const job=mergeJobs[mergeJob];
+  let html=`<div class="mergeCurrent"><div class="mergeSectionLabel">Current merge — stays inside its original partition</div>`;
+  html+=`<div class="mergeGrid" style="--n:${work.length}">`;
+  html+=`<div class="mergeRow" style="--n:${work.length}">`;
+  html+=`<div class="mergeSegment" style="${spanStyle(job.leftNode)}">${mergeGroupHTML(mL,mLi<mL.length?mLi:-1)}</div>`;
+  html+=`<div class="mergeSegment" style="${spanStyle(job.rightNode)}">${mergeGroupHTML(mR,mRi<mR.length?mRi:-1)}</div>`;
+  html+=`</div>`;
+  html+=`<div class="mergeOutputLabel">Merged output for indexes ${job.node.start}–${job.node.end}</div>`;
+  html+=`<div class="mergeRow" style="--n:${work.length}"><div class="mergeSegment" style="${spanStyle(job.node)}">${mergeGroupHTML(mO)}</div></div>`;
+  html+=`</div></div>`;
+  return html;
+}
+function loadMergeJob(){
+  const job=mergeJobs[mergeJob];
+  mL=job.L.slice();mR=job.R.slice();mO=[];mLi=0;mRi=0;
+}
+function renderMerge(){
+  titleEl.textContent="How Merge Sort Works";
+  subheadEl.textContent="The complete split is shown first. If a split is uneven, the LEFT partition gets the extra element. Then merge each branch back up in place.";
+  arrayWrap.classList.add("hidden");treeEl.classList.remove("hidden");
+  noMeta();legend([["purple","Front values currently being compared"]]);
+  treeEl.innerHTML=`<div class="mergePractice">${renderSplitTree()}${renderCompletedMerges()}${renderActiveMerge()}</div>`;
+  iter=mergeJob+1;iterationEl.textContent=iter;
+
+  if(mLi>=mL.length || mRi>=mR.length){
+    const rest=mLi<mL.length?mL.slice(mLi):mR.slice(mRi);
+    mO.push(...rest);mLi=mL.length;mRi=mR.length;
+    finishMergeJob();
+    return;
+  }
+  promptEl.textContent=`Compare the highlighted front values in their own partitions: ${mL[mLi]} (left) and ${mR[mRi]} (right). Which value goes into this partition's merged row next?`;
+  button(`LEFT — ${mL[mLi]}`,()=>mergePick("L"),true);
+  button(`RIGHT — ${mR[mRi]}`,()=>mergePick("R"));
+}
+function mergePick(side){
+  const expected=mL[mLi]<=mR[mRi]?"L":"R",ok=side===expected;score(ok);
+  if(!ok){feedback(false,"Choose the smaller highlighted FRONT value from these two partitions.");return;}
+  const v=side==="L"?mL[mLi++]:mR[mRi++];
+  mO.push(v);feedback(true,`Correct — ${v} is added to the merged row directly under this partition.`);
+  if(mLi>=mL.length||mRi>=mR.length){
+    const rest=mLi<mL.length?mL.slice(mLi):mR.slice(mRi);
+    if(rest.length)mO.push(...rest);
+    mLi=mL.length;mRi=mR.length;
+    finishMergeJob();
+  }else render();
+}
+function finishMergeJob(){
+  const job=mergeJobs[mergeJob];
+  mergeCompleted.set(segKey(job.node),{node:job.node,result:mO.slice()});
+  mergeJob++;
+  if(mergeJob>=mergeJobs.length){
+    work=mO.slice();done=true;
+    treeEl.innerHTML=`<div class="mergePractice">${renderSplitTree()}${renderCompletedMerges()}</div>`;
+    render();return;
+  }
+  loadMergeJob();render();
+}
+
+// Quick — lecture's moving-pivot / Left-Right pointer method
+function initQuick(){
+ qStack=[[0,work.length-1]];startQuickSegment();
+}
+function startQuickSegment(){
+ while(qStack.length){
+   const seg=qStack.pop();qLow=seg[0];qHigh=seg[1];
+   if(qLow<qHigh){
+     qPivotIndex=qLow; // matches the lecture examples: pivot starts at left side
+     qPivotVal=work[qPivotIndex];
+     qLeft=qLow;qRight=qHigh;qSide="right";
+     return;
+   }
+ }
+ done=true;
+}
+function renderQuick(){
+ titleEl.textContent="How Quick Sort Works";
+ subheadEl.textContent="Goal: values left of the pivot are less than it; values right of the pivot are greater than it.";
+ meta([["Pivot",`${qPivotVal} (index ${qPivotIndex})`],["Left",`index ${qLeft}`],["Right",`index ${qRight}`]]);
+ renderArray();legend([["green","Pivot / pointer labels"],["purple","Current comparison"]]);
+ const other=qSide==="right"?work[qRight]:work[qLeft];
+ if(qSide==="right"){
+   promptEl.textContent=`Is ${qPivotVal} < ${other}?`;
+ }else{
+   promptEl.textContent=`Is ${qPivotVal} > ${other}?`;
+ }
+ button("Yes",()=>quickAnswer(true),true);button("No",()=>quickAnswer(false));
+ const note=document.createElement("div");note.className="quick-note";note.textContent="Lecture note: you will not be asked to perform Quick Sort on the exam.";legendEl.appendChild(note);
+}
+function quickAnswer(yes){
+ let expected;
+ if(qSide==="right")expected=qPivotVal<work[qRight];
+ else expected=qPivotVal>work[qLeft];
+ const ok=yes===expected;score(ok);
+ if(!ok){feedback(false,"Check the exact Pivot/Left/Right comparison shown in the prompt.");return;}
+ if(qSide==="right"){
+   if(expected){
+     qRight--;
+     feedback(true,"Correct — no swap. Move Right one index left.");
+   }else{
+     [work[qPivotIndex],work[qRight]]=[work[qRight],work[qPivotIndex]];
+     qPivotIndex=qRight;
+     qSide="left";
+     feedback(true,"Correct — comparison failed, so swap Pivot and Right. Pivot is now on the Right side.");
+   }
+ }else{
+   if(expected){
+     qLeft++;
+     feedback(true,"Correct — no swap. Move Left one index right.");
+   }else{
+     [work[qPivotIndex],work[qLeft]]=[work[qLeft],work[qPivotIndex]];
+     qPivotIndex=qLeft;
+     qSide="right";
+     feedback(true,"Correct — comparison failed, so swap Pivot and Left. Pivot is now on the Left side.");
+   }
+ }
+ if(qLeft===qRight){
+   const p=qPivotIndex;
+   qStack.push([p+1,qHigh]);qStack.push([qLow,p-1]);
+   iter++;
+   startQuickSegment();
+ }
+ render();
+}
+
+// Linear
+function renderLinear(){
+ titleEl.textContent="How Linear Search Works";
+ subheadEl.textContent="Compare the target with each element one by one from left to right.";
+ meta([["Searching For",target],["Current Index",linIndex],["Value at Current Index",work[linIndex]]]);
+ renderArray();legend([["purple","Current index"]]);
+ promptEl.textContent=`Is ${work[linIndex]} equal to ${target}?`;
+ button("Yes",()=>linearAnswer(true),true);button("No",()=>linearAnswer(false));
+}
+function linearAnswer(yes){
+ const expected=work[linIndex]===target,ok=yes===expected;score(ok);
+ if(!ok){feedback(false,expected?"They are equal — the search should stop here.":"They are not equal — continue to the next index.");return;}
+ if(expected){feedback(true,`Correct — return index ${linIndex}.`);done=true;}
+ else{
+   linIndex++;iter++;
+   if(linIndex>=work.length){feedback(true,"Correct — end of array reached. Return -1.");done=true;}
+   else feedback(true,"Correct — move to the next index.");
+ }
+ render();
+}
+
+// Binary
+function binaryMiddleChoices(m){
+ const opts=new Set([m]);
+ [m-1,m+1,Math.max(binStart,m-2),Math.min(binEnd,m+2)].forEach(x=>{if(x>=binStart&&x<=binEnd)opts.add(x)});
+ return [...opts].sort((a,b)=>a-b);
+}
+function renderBinary(){
+ titleEl.textContent="How Binary Search Works – Searching";
+ subheadEl.textContent="The array is sorted. Recalculate the middle index for the current search range.";
+ meta([["Searching For",target],["Start Index",binStart],["End Index",binEnd]]);
+ renderArray();legend([["yellow","Middle index"],["purple","Current search range"]]);
+ if(binPhase==="middle"){
+   promptEl.textContent=`(${binStart} + ${binEnd}) / 2 = ${(binStart+binEnd)/2}. Round down. What is the middle index?`;
+   binaryMiddleChoices(Math.floor((binStart+binEnd)/2)).forEach(x=>button(String(x),()=>binaryChooseMiddle(x),x===Math.floor((binStart+binEnd)/2)));
+ }else{
+   const v=work[binMid];
+   promptEl.textContent=`The value at middle index ${binMid} is ${v}. Compared with target ${target}, the middle value is...`;
+   button("Less Than Target",()=>binaryRelation("lt"),true);
+   button("Equal to Target",()=>binaryRelation("eq"));
+   button("Greater Than Target",()=>binaryRelation("gt"));
+ }
+}
+function binaryChooseMiddle(x){
+ const m=Math.floor((binStart+binEnd)/2),ok=x===m;score(ok);
+ if(!ok){feedback(false,"Round down after calculating (start + end) / 2.");return;}
+ binMid=m;binPhase="relation";feedback(true,`Correct — middle index is ${m}.`);render();
+}
+function binaryRelation(rel){
+ const v=work[binMid];
+ const expected=v===target?"eq":v<target?"lt":"gt",ok=rel===expected;score(ok);
+ if(!ok){feedback(false,"Compare the middle VALUE with the target value.");return;}
+ if(expected==="eq"){feedback(true,`Correct — return index ${binMid}.`);done=true;render();return;}
+ if(expected==="lt"){
+   binStart=binMid+1;feedback(true,`Correct — target is larger, so focus on indexes ${binStart} through ${binEnd}.`);
+ }else{
+   binEnd=binMid-1;feedback(true,`Correct — target is smaller, so focus on indexes ${binStart} through ${binEnd}.`);
+ }
+ iter++;binMid=null;binPhase="middle";
+ if(binStart>binEnd){feedback(true,"No indexes remain. Return -1.");done=true;}
+ render();
+}
+
+// Hashing — based on the lecture's table examples
+function initHash(){
+  hashSize=Math.max(3,Math.min(10,Number(hashSizeEl.value)||5));
+  hashSizeEl.value=hashSize;
+  hashTable=Array.from({length:hashSize},()=>[]);
+  hashKeyIndex=0;hashPhase="hash";hashBase=0;hashProbeI=1;hashH2=null;hashProbeIndex=null;hashHistory=[];
+  treeEl.classList.remove("hidden");arrayWrap.classList.add("hidden");
+}
+function currentHashKey(){return work[hashKeyIndex]}
+function hashIndexButtons(correctIndex,handler){
+  for(let k=0;k<hashSize;k++)button(String(k),()=>handler(k),k===correctIndex);
+}
+function renderHashTableOnly(highlight=null,collision=null){
+  treeEl.classList.remove("hidden");arrayWrap.classList.add("hidden");
+  let rows="";
+  for(let idx=0;idx<hashSize;idx++){
+    const vals=hashTable[idx];
+    const classes=(idx===highlight?" hashCurrent":"")+(idx===collision?" hashCollision":"");
+    let content;
+    if(mode==="hash-chain"){
+      content=vals.length?vals.map((v,j)=>`${j?'<span class="hashArrow">→</span>':''}<b>${v}</b>`).join(""):`<span class="hashEmpty">empty</span>`;
+    }else{
+      content=vals.length?`<b>${vals[0]}</b>`:`<span class="hashEmpty">empty</span>`;
+    }
+    rows+=`<tr class="${classes}"><th>${idx}</th><td class="${mode==="hash-chain"?"chain":""}">${content}</td></tr>`;
+  }
+  treeEl.innerHTML=`<div class="hashLayout">
+    <div class="hashWork" id="hashWork"></div>
+    <table class="hashTable"><thead><tr><th>Index</th><th>${mode==="hash-chain"?"Key / Chain":"Key"}</th></tr></thead><tbody>${rows}</tbody></table>
+  </div>`;
+}
+function hashWorkText(extra=""){
+  const key=currentHashKey();
+  const modeName=names()[mode];
+  let formula=`H(${key}) = ${key} % ${hashSize}`;
+  if(mode==="hash-double")formula=`H1(${key}) = ${key} % ${hashSize}`;
+  const history=hashHistory.length?`<div class="small" style="margin-top:8px">Probe history: ${hashHistory.join(" → ")}</div>`:"";
+  return `<div class="hashFormula">${modeName}</div>
+    <div class="hashStep">Step ${hashKeyIndex+1}: insert key ${key}</div>
+    <div style="margin-top:8px">${formula}</div>${extra}${history}`;
+}
+function renderHash(){
+  titleEl.textContent=names()[mode];
+  subheadEl.textContent=mode==="hash-chain"
+    ?"Use the hash function to choose a table index. Collisions stay at that same index by creating a chain."
+    :mode==="hash-linear"
+    ?"Use the hash function first. If that index is occupied, move forward to the next available index."
+    :mode==="hash-quadratic"
+    ?"Use H(x) first. On a collision, use the original hash index + i²; i starts at 1 and increases for that key."
+    :"Use H1 first. On a collision, compute H2, then use [H1 + i × H2] % table size; i starts at 1.";
+  legend([]);
+  const key=currentHashKey();
+
+  if(hashPhase==="hash"){
+    const correct=((key%hashSize)+hashSize)%hashSize;
+    renderHashTableOnly(null,null);
+    $("hashWork").innerHTML=hashWorkText();
+    promptEl.textContent=`${key} % ${hashSize} = ? Which index does the hash function point to first?`;
+    hashIndexButtons(correct,(choice)=>hashChooseBase(choice));
+    return;
+  }
+
+  if(hashPhase==="chain"){
+    renderHashTableOnly(hashBase,hashBase);
+    $("hashWork").innerHTML=hashWorkText(`<div style="margin-top:8px;color:#ffd0d7">Index ${hashBase} is already occupied. This is a collision.</div>`);
+    promptEl.textContent=`Separate chaining keeps the key at index ${hashBase}. What should happen?`;
+    button("Create / extend the chain",()=>hashChainAnswer(true),true);
+    button("Move to the next index",()=>hashChainAnswer(false));
+    return;
+  }
+
+  if(hashPhase==="h2"){
+    const correct=1+(((key%3)+3)%3);
+    renderHashTableOnly(null,hashBase);
+    $("hashWork").innerHTML=hashWorkText(`<div style="margin-top:8px">Collision at index ${hashBase}. Now compute H2(${key}) = 1 + (${key} % 3).</div>`);
+    promptEl.textContent=`What is H2(${key})?`;
+    const opts=[1,2,3,4].filter(x=>x<=4);
+    opts.forEach(x=>button(String(x),()=>hashChooseH2(x),x===correct));
+    return;
+  }
+
+  if(hashPhase==="probe"){
+    let candidate;
+    let extra="";
+    if(mode==="hash-linear"){
+      candidate=(hashBase+hashProbeI)%hashSize;
+      extra=`<div style="margin-top:8px">Linear probe: (${hashBase} + ${hashProbeI}) % ${hashSize}</div>`;
+    }else if(mode==="hash-quadratic"){
+      candidate=(hashBase+hashProbeI*hashProbeI)%hashSize;
+      extra=`<div style="margin-top:8px">Quadratic probe: (${hashBase} + ${hashProbeI}<sup>2</sup>) % ${hashSize}</div>`;
+    }else{
+      candidate=(hashBase+hashProbeI*hashH2)%hashSize;
+      extra=`<div style="margin-top:8px">Collision formula: [${hashBase} + ${hashProbeI} × ${hashH2}] % ${hashSize}</div>`;
+    }
+    hashProbeIndex=candidate;
+    const occupied=hashTable[candidate].length>0;
+    renderHashTableOnly(candidate,occupied?candidate:null);
+    $("hashWork").innerHTML=hashWorkText(extra+`<div style="margin-top:6px">${occupied?`Index ${candidate} is occupied.`:`Index ${candidate} is available.`}</div>`);
+    promptEl.textContent=`What index does this probe produce?`;
+    hashIndexButtons(candidate,(choice)=>hashChooseProbe(choice));
+  }
+}
+function hashChooseBase(choice){
+  const key=currentHashKey(),correct=((key%hashSize)+hashSize)%hashSize,ok=choice===correct;score(ok);
+  if(!ok){feedback(false,`Use remainder: ${key} % ${hashSize}.`);return;}
+  hashBase=correct;hashHistory=[correct];feedback(true,`Correct — the hash function points to index ${correct}.`);
+  if(mode==="hash-chain"){
+    if(hashTable[correct].length){hashPhase="chain";render();}
+    else{hashTable[correct].push(key);advanceHashKey();}
+    return;
+  }
+  if(!hashTable[correct].length){hashTable[correct].push(key);advanceHashKey();return;}
+  if(mode==="hash-double"){hashPhase="h2";render();return;}
+  hashProbeI=1;hashPhase="probe";render();
+}
+function hashChainAnswer(createChain){
+  const ok=createChain;score(ok);
+  if(!ok){feedback(false,"Separate chaining does NOT move to another index. Keep the key at the same index and extend the chain.");return;}
+  hashTable[hashBase].push(currentHashKey());
+  feedback(true,`Correct — add ${currentHashKey()} to the chain at index ${hashBase}.`);
+  advanceHashKey();
+}
+function hashChooseH2(choice){
+  const key=currentHashKey(),correct=1+(((key%3)+3)%3),ok=choice===correct;score(ok);
+  if(!ok){feedback(false,`Use H2(x) = 1 + (x % 3).`);return;}
+  hashH2=correct;hashProbeI=1;hashPhase="probe";feedback(true,`Correct — H2(${key}) = ${correct}.`);render();
+}
+function hashChooseProbe(choice){
+  const candidate=hashProbeIndex,ok=choice===candidate;score(ok);
+  if(!ok){feedback(false,"Recalculate the probe formula shown above.");return;}
+  hashHistory.push(candidate);
+  if(hashTable[candidate].length){
+    feedback(true,`Correct index, but index ${candidate} is occupied. Increase i and try again.`);
+    hashProbeI++;
+    if(hashProbeI>20){feedback(false,"Probe cycle detected. Try a different custom key set or table size.");return;}
+    render();return;
+  }
+  hashTable[candidate].push(currentHashKey());
+  feedback(true,`Correct — index ${candidate} is open, so place ${currentHashKey()} there.`);
+  advanceHashKey();
+}
+function advanceHashKey(){
+  hashKeyIndex++;
+  if(hashKeyIndex>=work.length){done=true;render();return;}
+  hashPhase="hash";hashBase=0;hashProbeI=1;hashH2=null;hashProbeIndex=null;hashHistory=[];
+  iter=hashKeyIndex+1;render();
+}
+
+
+// Toolbar
+$("apply").addEventListener("click",()=>{
+ const a=parseArray(inputEl.value);
+ if(!a){feedback(false,"Enter 3–10 integers separated by commas.");return;}
+ if(modeEl.value.startsWith("hash-") && modeEl.value!=="hash-chain"){
+   const size=Math.max(3,Math.min(10,Number(hashSizeEl.value)||5));
+   if(a.length>size){feedback(false,"For open addressing, use no more keys than table slots.");return;}
+ }
+ base=a;setup();
+});
+$("random").addEventListener("click",()=>{
+ if(modeEl.value.startsWith("hash-")){
+   hashSizeEl.value=5;
+   base=randomUnique(5);inputEl.value=base.join(", ");setup();
+ }else{
+   base=randomUnique(6+Math.floor(Math.random()*3));inputEl.value=base.join(", ");setup();
+ }
+});
+$("lecture").addEventListener("click",()=>{
+ const p=lecturePresets[modeEl.value];base=p.a.slice();inputEl.value=base.join(", ");
+ if(p.size)hashSizeEl.value=p.size;
+ setup(p.t??null);
+});
+$("ruleBtn").addEventListener("click",()=>ruleEl.classList.toggle("hidden"));
+$("resetScore").addEventListener("click",()=>{correct=0;attempts=0;scoreEl.textContent="0 / 0";accuracyEl.textContent="—";});
+modeEl.addEventListener("change",()=>{
+ const p=lecturePresets[modeEl.value];base=p.a.slice();inputEl.value=base.join(", ");
+ if(p.size)hashSizeEl.value=p.size;
+ setup(p.t??null);
+});
+
+hashSizeEl.addEventListener("change",()=>{
+ if(modeEl.value.startsWith("hash-"))setup();
+});
+
+setup();
+})();
+</script>
+</body>
+</html>
